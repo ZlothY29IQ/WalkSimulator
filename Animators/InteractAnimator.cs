@@ -55,8 +55,8 @@ namespace WalkSimulator.Animators
         private IEnumerator Raycast(HandDriver hand)
         {
             Ray ray = new Ray(Camera.main.transform.position, reticle.position - Camera.main.transform.position);
-            int buttonLayer = LayerMask.GetMask("GorillaInteractable", "TransparentFX");
-            RaycastHit[] hits = Physics.RaycastAll(ray, 0.82f, buttonLayer);
+
+            RaycastHit[] hits = Physics.RaycastAll(ray, 0.82f);
 
             foreach (var hit in hits)
             {
@@ -72,6 +72,7 @@ namespace WalkSimulator.Animators
 
             state = State.IDLE;
         }
+
 
         private IEnumerator PressButton(HandDriver hand, Vector3 targetPosition)
         {
