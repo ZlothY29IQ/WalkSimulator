@@ -1,9 +1,9 @@
 ﻿using System.Collections;
+using GorillaLocomotion;
 using GorillaNetworking;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using WalkSimulator.Rigging;
-using WalkSimulator.Tools;
 
 namespace WalkSimulator.Animators
 {
@@ -56,19 +56,16 @@ namespace WalkSimulator.Animators
         {
             Ray ray = new Ray(Camera.main.transform.position, reticle.position - Camera.main.transform.position);
 
-            RaycastHit[] hits = Physics.RaycastAll(ray, 0.82f);
-
-            foreach (var hit in hits)
+            int buttonLayer = LayerMask.GetMask(new string[2]
             {
-                var pressableButton = hit.transform.GetComponent<GorillaPressableButton>();
-                var keyboardButton = hit.transform.GetComponent<GorillaKeyboardButton>();
-                var lineButton = hit.transform.GetComponent<GorillaPlayerLineButton>();
+                "GorillaInteractable",
+                "TransparentFX"
+            });
 
-                if (pressableButton || keyboardButton || lineButton)
-                {
-                    yield return PressButton(hand, hit.point - Camera.main.transform.forward * 0.05f);
-                }
-            }
+            int layerMask = buttonLayer | GTPlayer.Instance.locomotionEnabledLayers;
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 0.82f, layerMask))
+                yield return PressButton(hand, hit.point - Camera.main.transform.forward * 0.05f);
 
             state = State.IDLE;
         }
