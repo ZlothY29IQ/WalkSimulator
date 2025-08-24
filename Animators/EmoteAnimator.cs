@@ -15,7 +15,8 @@ namespace WalkSimulator.Animators
             Shrug,
             Dance,
             Dance2,
-            Goofy
+            Goofy,
+            UltraGoofy
         }
 
         private struct HandPositionInfo
@@ -66,6 +67,9 @@ namespace WalkSimulator.Animators
                 case Emote.Goofy:
                     handPositioner = GoofyPositioner;
                     break;
+                case Emote.UltraGoofy:
+                    handPositioner = UltraGoofyPositioner;
+                    break;
             }
 
             AnimateBody();
@@ -104,13 +108,34 @@ namespace WalkSimulator.Animators
                 );
 
                 head.localPosition = headOffset;
-                
-                head.localRotation = Quaternion.Euler(
-            1f,
-            Mathf.Sin(elapsed * 10f) * 30f,
-            1f
-        );
 
+                head.localRotation = Quaternion.Euler(
+                    1f,
+                    Mathf.Sin(elapsed * 10f) * 30f,
+                    1f
+                );
+            }
+            else if (emote == Emote.UltraGoofy)
+            {
+                float elapsed = Time.time - startTime;
+                
+                rig.targetPosition = startingPosition + new Vector3(
+                    Mathf.Sin(elapsed * 8f) * 0.25f,
+                    Mathf.Abs(Mathf.Sin(elapsed * 15f)) * 0.3f,
+                    Mathf.Cos(elapsed * 7f) * 0.2f
+                );
+                
+                head.localPosition = new Vector3(
+                    Mathf.Sin(elapsed * 20f) * 0.2f,
+                    Mathf.Cos(elapsed * 25f) * 0.2f,
+                    Mathf.Sin(elapsed * 30f) * 0.1f
+                );
+
+                head.localRotation = Quaternion.Euler(
+                    Mathf.Sin(elapsed * 40f) * 45f,
+                    Mathf.Cos(elapsed * 35f) * 60f,
+                    Mathf.Sin(elapsed * 50f) * 70f
+                );
             }
             else
             {
@@ -150,7 +175,9 @@ namespace WalkSimulator.Animators
                     return new HandPositionInfo
                     {
                         position = head.TransformPoint(offset),
-                        lookAt = hand.isLeft ? hand.targetPosition + head.right + head.forward : hand.targetPosition - head.right + head.forward,
+                        lookAt = hand.isLeft
+                            ? hand.targetPosition + head.right + head.forward
+                            : hand.targetPosition - head.right + head.forward,
                         up = head.up,
                         grip = true,
                         trigger = true,
@@ -201,6 +228,7 @@ namespace WalkSimulator.Animators
                     return default;
             }
         }
+
         private HandPositionInfo GoofyPositioner(HandDriver hand, float t)
         {
             float phase = hand.isLeft ? 0f : Mathf.PI;
@@ -223,84 +251,115 @@ namespace WalkSimulator.Animators
             };
         }
 
+        private HandPositionInfo UltraGoofyPositioner(HandDriver hand, float t)
+        {
+            float phase = hand.isLeft ? 0f : Mathf.PI;
+            
+            Vector3 offset = new Vector3(
+                (hand.isLeft ? -0.3f : 0.3f) + Mathf.Sin(t * 15f + phase) * 0.25f,
+                Mathf.Sin(t * 20f + phase * 2f) * 0.25f + Mathf.Cos(t * 5f) * 0.15f,
+                0.3f + Mathf.Cos(t * 12f + phase) * 0.2f
+            );
+            
+            offset += new Vector3(
+                Mathf.PerlinNoise(t * 3f, phase) * 0.1f,
+                Mathf.PerlinNoise(phase, t * 4f) * 0.1f,
+                Mathf.PerlinNoise(t * 5f, t * 2f) * 0.1f
+            );
+
+            return new HandPositionInfo
+            {
+                position = head.TransformPoint(offset),
+                lookAt = head.position + new Vector3(
+                    Mathf.Sin(t * 25f) * 0.5f,
+                    Mathf.Cos(t * 30f) * 0.3f,
+                    1f
+                ),
+                up = Quaternion.Euler(
+                    Mathf.Sin(t * 50f) * 90f,
+                    Mathf.Cos(t * 40f) * 90f,
+                    Mathf.Sin(t * 60f) * 90f
+                ) * Vector3.up,
+                grip = UnityEngine.Random.value > 0.5f,
+                trigger = UnityEngine.Random.value > 0.5f,
+                thumb = UnityEngine.Random.value > 0.5f,
+                used = true
+            };
+        }
+
         private HandPositionInfo Dance2Positioner(HandDriver hand, float t)
         {
-            
-                float elapsed = Time.time - startTime;
+            float elapsed = Time.time - startTime;
 
-                float phase = hand.isLeft ? 0f : Mathf.PI;
+            float phase = hand.isLeft ? 0f : Mathf.PI;
 
-                Vector3 offset;
+            Vector3 offset;
 
-                int pose = (int)((elapsed / 1.2f) % 4);
+            int pose = (int)((elapsed / 1.2f) % 4);
 
-                switch (pose)
-                {
-                    case 0:
-                        offset = new Vector3(hand.isLeft ? -0.25f : 0.25f, -0.2f, 0.3f);
-                        offset.y += Mathf.Sin(t * 8f + phase) * 0.1f;
-                        offset.x += Mathf.Sin(t * 4f + phase) * 0.05f;
-                        return new HandPositionInfo
-                        {
-                            position = head.TransformPoint(offset),
-                            lookAt = head.position + head.forward + Vector3.up * 0.1f,
-                            up = head.up,
-                            grip = true,
-                            trigger = false,
-                            thumb = true,
-                            used = true
-                        };
-                    case 1:
-                        offset = new Vector3(hand.isLeft ? -0.2f : 0.2f, -0.25f, 0.35f);
-                        offset.y += Mathf.Cos(t * 6f + phase) * 0.12f;
-                        offset.z += Mathf.Sin(t * 5f + phase) * 0.08f;
-                        return new HandPositionInfo
-                        {
-                            position = head.TransformPoint(offset),
-                            lookAt = head.position + head.forward * 1.1f,
-                            up = hand.isLeft ? head.right : -head.right,
-                            grip = true,
-                            trigger = true,
-                            thumb = false,
-                            used = true
-                        };
-                    case 2:
-                        offset = new Vector3(hand.isLeft ? -0.3f : 0.3f, -0.15f, 0.25f);
-                        offset.x += Mathf.Sin(t * 6f + phase) * 0.08f;
-                        offset.y += Mathf.Sin(t * 10f + phase) * 0.1f;
-                        return new HandPositionInfo
-                        {
-                            position = head.TransformPoint(offset),
-                            lookAt = head.position + head.forward + Vector3.up * 0.2f,
-                            up = head.up,
-                            grip = false,
-                            trigger = true,
-                            thumb = true,
-                            used = true
-                        };
-                    case 3:
-                        offset = new Vector3(hand.isLeft ? -0.2f : 0.2f, -0.25f, 0.3f);
-                        offset.x += Mathf.Cos(t * 5f + phase) * 0.1f;
-                        offset.z += Mathf.Sin(t * 6f + phase) * 0.1f;
-                        offset.y += Mathf.Sin(t * 8f + phase) * 0.1f;
-                        return new HandPositionInfo
-                        {
-                            position = head.TransformPoint(offset),
-                            lookAt = head.position + head.forward,
-                            up = hand.isLeft ? head.right : -head.right,
-                            grip = true,
-                            trigger = true,
-                            thumb = true,
-                            used = true
-                        };
-                    default:
-                        return default;
-                }
+            switch (pose)
+            {
+                case 0:
+                    offset = new Vector3(hand.isLeft ? -0.25f : 0.25f, -0.2f, 0.3f);
+                    offset.y += Mathf.Sin(t * 8f + phase) * 0.1f;
+                    offset.x += Mathf.Sin(t * 4f + phase) * 0.05f;
+                    return new HandPositionInfo
+                    {
+                        position = head.TransformPoint(offset),
+                        lookAt = head.position + head.forward + Vector3.up * 0.1f,
+                        up = head.up,
+                        grip = true,
+                        trigger = false,
+                        thumb = true,
+                        used = true
+                    };
+                case 1:
+                    offset = new Vector3(hand.isLeft ? -0.2f : 0.2f, -0.25f, 0.35f);
+                    offset.y += Mathf.Cos(t * 6f + phase) * 0.12f;
+                    offset.z += Mathf.Sin(t * 5f + phase) * 0.08f;
+                    return new HandPositionInfo
+                    {
+                        position = head.TransformPoint(offset),
+                        lookAt = head.position + head.forward * 1.1f,
+                        up = hand.isLeft ? head.right : -head.right,
+                        grip = true,
+                        trigger = true,
+                        thumb = false,
+                        used = true
+                    };
+                case 2:
+                    offset = new Vector3(hand.isLeft ? -0.3f : 0.3f, -0.15f, 0.25f);
+                    offset.x += Mathf.Sin(t * 6f + phase) * 0.08f;
+                    offset.y += Mathf.Sin(t * 10f + phase) * 0.1f;
+                    return new HandPositionInfo
+                    {
+                        position = head.TransformPoint(offset),
+                        lookAt = head.position + head.forward + Vector3.up * 0.2f,
+                        up = head.up,
+                        grip = false,
+                        trigger = true,
+                        thumb = true,
+                        used = true
+                    };
+                case 3:
+                    offset = new Vector3(hand.isLeft ? -0.2f : 0.2f, -0.25f, 0.3f);
+                    offset.x += Mathf.Cos(t * 5f + phase) * 0.1f;
+                    offset.z += Mathf.Sin(t * 6f + phase) * 0.1f;
+                    offset.y += Mathf.Sin(t * 8f + phase) * 0.1f;
+                    return new HandPositionInfo
+                    {
+                        position = head.TransformPoint(offset),
+                        lookAt = head.position + head.forward,
+                        up = hand.isLeft ? head.right : -head.right,
+                        grip = true,
+                        trigger = true,
+                        thumb = true,
+                        used = true
+                    };
+                default:
+                    return default;
             }
-
-        
-
-
+        }
 
         private HandPositionInfo ThumbsDownPositioner(HandDriver hand, float _)
         {
@@ -333,7 +392,9 @@ namespace WalkSimulator.Animators
             return new HandPositionInfo
             {
                 position = body.TransformPoint(new Vector3(hand.isLeft ? -0.4f : 0.4f, 0f, 0.2f)),
-                lookAt = hand.isLeft ? hand.targetPosition - head.right + head.forward : hand.targetPosition + head.right + head.forward,
+                lookAt = hand.isLeft
+                    ? hand.targetPosition - head.right + head.forward
+                    : hand.targetPosition + head.right + head.forward,
                 up = -head.forward,
                 used = true
             };

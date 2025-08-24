@@ -18,15 +18,11 @@ namespace WalkSimulator
         public static Vector3 inputDirection;
         public static Vector3 inputDirectionNoY;
 
-        public static string deviceName = string.Empty;
-        public static string devicePrefix = string.Empty;
-
         private bool Jump => Keyboard.current.spaceKey.wasPressedThisFrame;
 
         private void Awake()
         {
             Instance = this;
-            ValidateDevices();
         }
 
         private void Update()
@@ -59,6 +55,7 @@ namespace WalkSimulator
             if (Keyboard.current.digit6Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance);
             if (Keyboard.current.digit7Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance2);
             if (Keyboard.current.digit8Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Goofy);
+            if (Keyboard.current.digit9Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.UltraGoofy);
         }
 
         private void EnableEmote(EmoteAnimator.Emote emote)
@@ -124,11 +121,6 @@ namespace WalkSimulator
             if (Keyboard.current.spaceKey.isPressed) y += 1f;
 
             return new Vector3(x, y, z);
-        }
-
-        private void ValidateDevices()
-        {
-            // idk
         }
     }
 }
