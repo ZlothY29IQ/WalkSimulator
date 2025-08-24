@@ -4,7 +4,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using BepInEx;
 using GorillaNetworking;
-using GorillaTagModTemplateProject;
 using HarmonyLib;
 using Photon.Pun;
 using ExitGames.Client.Photon;
@@ -18,7 +17,7 @@ using static WalkSimulator.Tools.AssetUtils;
 
 namespace WalkSimulator
 {
-    [BepInPlugin("com.kylethescientist.gorillatag.walksimulator", "WalkSimulator", "1.0.0")]
+    [BepInPlugin("kylethescientist.zlothy.walksimulator", "WalkSimulator", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }

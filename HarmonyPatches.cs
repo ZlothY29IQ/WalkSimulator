@@ -2,18 +2,15 @@
 using System.Reflection;
 using HarmonyLib;
 
-namespace GorillaTagModTemplateProject
+namespace WalkSimulator
 {
-	/// <summary>
-	/// This class handles applying harmony patches to the game.
-	/// You should not need to modify this class.
-	/// </summary>
+	
 	public class HarmonyPatches
 	{
 		private static Harmony instance;
 
 		public static bool IsPatched { get; private set; }
-		public const string InstanceId = "com.kylethescientist.gorillatag.walksimulator";
+		public const string InstanceId = "kylethescientist.zlothy.walksimulator";
 
 		internal static void ApplyHarmonyPatches()
 		{
