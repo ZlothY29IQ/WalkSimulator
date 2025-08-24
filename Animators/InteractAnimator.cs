@@ -30,6 +30,8 @@ namespace WalkSimulator.Animators
 
         private void Update()
         {
+            UpdateReticleVisibility();
+
             if (state == State.IDLE)
             {
                 if (Mouse.current.leftButton.isPressed)
@@ -54,21 +56,34 @@ namespace WalkSimulator.Animators
 
         private IEnumerator Raycast(HandDriver hand)
         {
-            Ray ray = new Ray(Camera.main.transform.position, reticle.position - Camera.main.transform.position);
+            Vector3 targetPosition;
 
-            int buttonLayer = LayerMask.GetMask(new string[2]
+            if (HeadDriver.Instance.LockCursor)
             {
-                "GorillaInteractable",
-                "TransparentFX"
-            });
+                targetPosition = reticle.position;
+            }
+            else
+            {
+                Vector3 mousePos = Mouse.current.position.ReadValue();
+                Ray mouseRay = Camera.main.ScreenPointToRay(mousePos);
 
+                if (Physics.Raycast(mouseRay, out RaycastHit hit, 5f))
+                    targetPosition = hit.point;
+                else
+                    targetPosition = mouseRay.origin + mouseRay.direction * 5f;
+            }
+
+            Ray ray = new Ray(Camera.main.transform.position, targetPosition - Camera.main.transform.position);
+
+            int buttonLayer = LayerMask.GetMask("GorillaInteractable", "TransparentFX");
             int layerMask = buttonLayer | GTPlayer.Instance.locomotionEnabledLayers;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 0.82f, layerMask))
-                yield return PressButton(hand, hit.point - Camera.main.transform.forward * 0.05f);
+            if (Physics.Raycast(ray, out RaycastHit finalHit, 0.82f, layerMask))
+                yield return PressButton(hand, finalHit.point - Camera.main.transform.forward * 0.05f);
 
             state = State.IDLE;
         }
+
 
 
         private IEnumerator PressButton(HandDriver hand, Vector3 targetPosition)
@@ -129,6 +144,21 @@ namespace WalkSimulator.Animators
             reticle.localPosition = Vector3.forward * 0.1f;
             reticle.gameObject.SetActive(false);
         }
+
+        private void UpdateReticleVisibility()
+        {
+            if (HeadDriver.Instance.LockCursor)
+            {
+                if (!reticle.gameObject.activeSelf)
+                    reticle.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (reticle.gameObject.activeSelf)
+                    reticle.gameObject.SetActive(false);
+            }
+        }
+
 
         public override void Setup()
         {
