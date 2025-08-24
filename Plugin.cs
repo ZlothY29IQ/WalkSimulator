@@ -186,14 +186,7 @@ namespace WalkSimulator
         }
 
 
-        private void FixedUpdate()
-        {
-            TryInitializeGamemode();
-        }
-
-        public void TryInitializeGamemode()
-        {
-        }
+       
 
         private void OnGUI()
         {
