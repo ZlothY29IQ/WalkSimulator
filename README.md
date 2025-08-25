@@ -38,7 +38,7 @@ __Pose Mode__
 __Computer Mode__
 * E to enter computer when in range.
 * Escape to exit computer
-* Letter and nukber keys match up to real keyboard (1 -> 1, A -> A, Backspace -> Delete, exc)
+* Letter and number keys match up to real keyboard (1 -> 1, A -> A, Backspace -> Delete, exc)
 * Up/Down arrow - Page Up/Down
 * F1 - Option 1
 * F2 - Option 2
