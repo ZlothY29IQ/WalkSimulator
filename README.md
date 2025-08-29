@@ -47,3 +47,5 @@ __Computer Mode__
 
 ![Dance](WalkSimDance.gif)
 
+<img src = "https://i.imgur.com/WwrcQX9.png">
+
