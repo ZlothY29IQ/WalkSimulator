@@ -1,4 +1,4 @@
-# WalkSimulator
+# WalkSimulator ![downloads](https://img.shields.io/github/downloads/ZlothY29IQ/WalkSimulator/total)
 A mod originally made by KyleTheScientist for interacting with Gorilla Tag without the need for a VR headset. This mod is only for Modded Rooms so if you attempt to join a non-modded you will automatically be disconnected.
 
 
