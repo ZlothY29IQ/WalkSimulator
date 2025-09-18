@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cinemachine;
+using Unity.Cinemachine;
 using GorillaLocomotion;
 using GorillaNetworking;
 using HarmonyLib;

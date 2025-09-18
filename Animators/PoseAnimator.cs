@@ -76,7 +76,7 @@ namespace WalkSimulator.Animators
             Vector3 offset = main.isLeft ? offsetLeft : offsetRight;
             Vector2 delta = Mouse.current.delta.ReadValue();
 
-            offset.z += Mouse.current.scroll.ReadValue().y / 1000f;
+            offset.z += Mouse.current.scroll.ReadValue().y / 10f;
 
             if (Keyboard.current.upArrowKey.wasPressedThisFrame)
                 offset.z += 0.1f;

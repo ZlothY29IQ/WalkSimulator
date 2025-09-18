@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+﻿using Unity.Cinemachine;
 using GorillaLocomotion;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
