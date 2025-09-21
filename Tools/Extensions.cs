@@ -15,15 +15,9 @@ namespace WalkSimulator.Tools
             return component != null ? component : obj.AddComponent<T>();
         }
 
-        public static void Obliterate(this GameObject self)
-        {
-            UnityEngine.Object.Destroy(self);
-        }
+        public static void Obliterate(this GameObject self) => UnityEngine.Object.Destroy(self);
 
-        public static void Obliterate(this Component self)
-        {
-            UnityEngine.Object.Destroy(self);
-        }
+        public static void Obliterate(this Component self) => UnityEngine.Object.Destroy(self);
 
         public static float Distance(this Vector3 self, Vector3 other)
         {

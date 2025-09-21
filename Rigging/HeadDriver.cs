@@ -50,7 +50,7 @@ namespace WalkSimulator.Rigging
         private void Awake() => Instance = this;
         private void Start()
         {
-            CinemachineThirdPersonFollow val = Object.FindObjectOfType<CinemachineThirdPersonFollow>();
+            Cinemachine3rdPersonFollow val = Object.FindObjectOfType<Cinemachine3rdPersonFollow>();
             thirpyTarget = val.VirtualCamera.Follow;
 
             Camera componentInParent = val.gameObject.GetComponentInParent<Camera>();
@@ -95,10 +95,7 @@ namespace WalkSimulator.Rigging
             head = GorillaTagger.Instance.offlineVRRig.head.rigTarget;
         }
 
-        internal void ToggleCam()
-        {
-            overrideCam.enabled = !overrideCam.enabled;
-        }
+        internal void ToggleCam() => overrideCam.enabled = !overrideCam.enabled;
 
         private void OnEnable()
         {

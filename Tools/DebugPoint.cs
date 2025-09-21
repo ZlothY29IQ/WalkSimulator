@@ -27,10 +27,7 @@ namespace WalkSimulator.Tools
             transform.localScale = Vector3.one * size * GTPlayer.Instance.scale;
         }
 
-        private void OnDestroy()
-        {
-            points.Remove(name);
-        }
+        private void OnDestroy() => points.Remove(name);
 
         public static Transform Get(string name, Vector3 position, Color color = default, float size = 0.1f)
         {

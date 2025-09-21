@@ -160,10 +160,7 @@ namespace WalkSimulator.Animators
         }
 
 
-        public override void Setup()
-        {
-            HeadDriver.Instance.LockCursor = true;
-        }
+        public override void Setup() => HeadDriver.Instance.LockCursor = true;
 
         public override void Cleanup()
         {
@@ -173,9 +170,6 @@ namespace WalkSimulator.Animators
             StopAllCoroutines();
         }
 
-        private void OnDestroy()
-        {
-            Destroy(reticle.gameObject);
-        }
+        private void OnDestroy() => Destroy(reticle.gameObject);
     }
 }

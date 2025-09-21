@@ -88,10 +88,7 @@ namespace WalkSimulator.Menus
             overrideCam.enabled = false;
         }
 
-        private void Start()
-        {
-            BuildButtonMap();
-        }
+        private void Start() => BuildButtonMap();
 
         private void Update()
         {

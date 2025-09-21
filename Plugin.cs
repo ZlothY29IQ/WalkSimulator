@@ -7,8 +7,10 @@ using GorillaNetworking;
 using HarmonyLib;
 using Photon.Pun;
 using ExitGames.Client.Photon;
+using OVR.OpenVR;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.XR;
 using WalkSimulator.Animators;
 using WalkSimulator.Menus;
 using WalkSimulator.Rigging;
@@ -46,6 +48,8 @@ namespace WalkSimulator
 
                 try
                 {
+                    if(XRSettings.isDeviceActive)
+                        return;
                     Debug.Log("[WalkSim] Adding InputHandler component...");
                     var inputHandler = gameObject.GetOrAddComponent<InputHandler>();
                     Debug.Log("[WalkSim] InputHandler added: " + (inputHandler != null));
@@ -136,6 +140,9 @@ namespace WalkSimulator
 
         void ModdedCheck()
         {
+            if(XRSettings.isDeviceActive)
+                return;
+            
             if (NetworkSystem.Instance.GameModeString.Contains("MODDED"))
                 return;
 
@@ -148,7 +155,7 @@ namespace WalkSimulator
             Debug.Log("[WalkSim] Plugin Start called");
             Enabled = true;
 
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() //I know technically your not allowed to do this but it's the only way to differentiate this legal one from all the other illegal ones.
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() //I know technically your not allowed to do this anymore, BUT it's the only way to differentiate this legal one from all the other illegal ones.
             {
                 { "WalkSimulator", "Originally Made By KyleTheScientist, Fixed by ZlothY." }
             });
@@ -184,10 +191,7 @@ namespace WalkSimulator
                 Debug.LogError("[WalkSim] Failed to detect platform: " + ex);
             }
         }
-
-
-       
-
+        
         private void OnGUI()
         {
             const float width = 400f;

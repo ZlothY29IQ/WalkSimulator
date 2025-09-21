@@ -19,11 +19,7 @@ namespace WalkSimulator.Animators
         private int layersBackup;
         private bool noClipActive = false;
 
-        private void Awake()
-        {
-            layersBackup = GTPlayer.Instance.locomotionEnabledLayers;
-        }
-
+        private void Awake() => layersBackup = GTPlayer.Instance.locomotionEnabledLayers;
         public override void Animate()
         {
             AnimateBody();

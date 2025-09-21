@@ -34,10 +34,13 @@ namespace WalkSimulator.Patches
                 if (forceLeftTrigger)
                 {
                     __instance.leftControllerIndexFloat = 1f;
+                    __instance.leftControllerTriggerButton = true;
                 }
                 if (forceRightTrigger)
                 {
                     __instance.rightControllerIndexFloat = 1f;
+                    __instance.rightControllerTriggerButton = true;
+
                 }
                 if (forceLeftPrimary)
                 {
