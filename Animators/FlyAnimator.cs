@@ -3,6 +3,7 @@ using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using WalkSimulator.Menus;
 using WalkSimulator.Rigging;
 using WalkSimulator.Tools;
 
@@ -13,6 +14,7 @@ namespace WalkSimulator.Animators
         private float speed = 1f;
         private float minSpeed = 0f;
         private float maxSpeed = 5f;
+        private float guiHeight = 20f;
 
         private int layersBackup;
         private bool noClipActive = false;
@@ -30,7 +32,7 @@ namespace WalkSimulator.Animators
 
         private void Update()
         {
-            speed += Mouse.current.scroll.ReadValue().y / 1000f;
+            speed += Mouse.current.scroll.ReadValue().y / 10f;
             speed = Mathf.Clamp(speed, minSpeed, maxSpeed);
 
             if (Keyboard.current.nKey.wasPressedThisFrame)
@@ -41,6 +43,24 @@ namespace WalkSimulator.Animators
                 GTPlayer.Instance.headCollider.isTrigger = noClipActive;
                 GTPlayer.Instance.bodyCollider.isTrigger = noClipActive;
             }
+        }
+        
+        private void OnGUI()
+        {
+            if (ComputerGUI.Instance.inRange)
+                guiHeight = 60f;
+            else
+                guiHeight = 20f;
+            
+            string message = "Fly speed: " + speed.ToString("F2");
+            GUI.Label(
+                new Rect(20f, guiHeight, 200f, 200f),
+                message,
+                new GUIStyle
+                {
+                    fontSize = 15,
+                    normal = new GUIStyleState { textColor = Color.white }
+                });
         }
 
         private void AnimateBody()

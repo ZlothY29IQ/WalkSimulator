@@ -47,14 +47,10 @@ namespace WalkSimulator.Rigging
             set => overrideCam.enabled = value;
         }
 
-        private void Awake()
-        {
-            Instance = this;
-        }
-
+        private void Awake() => Instance = this;
         private void Start()
         {
-            Cinemachine3rdPersonFollow val = Object.FindObjectOfType<Cinemachine3rdPersonFollow>();
+            CinemachineThirdPersonFollow val = Object.FindObjectOfType<CinemachineThirdPersonFollow>();
             thirpyTarget = val.VirtualCamera.Follow;
 
             Camera componentInParent = val.gameObject.GetComponentInParent<Camera>();
@@ -116,6 +112,8 @@ namespace WalkSimulator.Rigging
 
         private void OnDisable()
         {
+            Logging.Debug("Disabled"); //this is needed trust!
+
             if (head != null)
             {
                 LockCursor = false;

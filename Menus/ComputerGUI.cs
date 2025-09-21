@@ -24,7 +24,7 @@ namespace WalkSimulator.Menus
         private AnimatorBase cachedAnimator;
         private Transform currentTerminal;
         private Camera overrideCam;
-        private bool inRange;
+        public bool inRange;
 
         private readonly Dictionary<KeyControl, GorillaKeyboardBindings> buttonMapping
     = new Dictionary<KeyControl, GorillaKeyboardBindings>();

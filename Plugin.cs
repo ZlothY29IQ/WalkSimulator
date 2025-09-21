@@ -17,7 +17,7 @@ using static WalkSimulator.Tools.AssetUtils;
 
 namespace WalkSimulator
 {
-    [BepInPlugin("kylethescientist.zlothy.walksimulator", "WalkSimulator", "1.0.1")]
+    [BepInPlugin("kylethescientist.zlothy.walksimulator", "WalkSimulator", "1.0.2")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -139,8 +139,8 @@ namespace WalkSimulator
             if (NetworkSystem.Instance.GameModeString.Contains("MODDED"))
                 return;
 
-            PhotonNetwork.Disconnect();
-            Logging.Warning("You must be not in a room or connected to modded room to use WalkSimulator");
+            NetworkSystem.Instance.ReturnToSinglePlayer();
+            Logging.Warning("You cannot be in a non-modded game mode!");
         }
 
         private void Start()
@@ -148,7 +148,7 @@ namespace WalkSimulator
             Debug.Log("[WalkSim] Plugin Start called");
             Enabled = true;
 
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable()
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() //I know technically your not allowed to do this but it's the only way to differentiate this legal one from all the other illegal ones.
             {
                 { "WalkSimulator", "Originally Made By KyleTheScientist, Fixed by ZlothY." }
             });
@@ -211,9 +211,6 @@ namespace WalkSimulator
             }
         }
 
-        static Plugin()
-        {
-            _enabled = true;
-        }
+        static Plugin() => _enabled = true;
     }
 }
