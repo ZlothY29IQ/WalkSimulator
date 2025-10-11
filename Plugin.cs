@@ -19,7 +19,7 @@ using static WalkSimulator.Tools.AssetUtils;
 
 namespace WalkSimulator
 {
-    [BepInPlugin("kylethescientist.zlothy.walksimulator", "WalkSimulator", "1.0.2")]
+    [BepInPlugin("kylethescientist.zlothy.walksimulator", "WalkSimulator", "1.0.3")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
