@@ -1,7 +1,7 @@
 ﻿using Unity.Cinemachine;
 using GorillaLocomotion;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.InputSystem;
 
 namespace WalkSimulator.Rigging
@@ -56,6 +56,7 @@ namespace WalkSimulator.Rigging
             Camera componentInParent = val.gameObject.GetComponentInParent<Camera>();
             cameraObject = new GameObject("WalkSim First Person Camera");
             overrideCam = cameraObject.AddComponent<Camera>();
+            cameraObject.AddComponent<UniversalAdditionalCameraData>();
 
             overrideCam.fieldOfView = 90f;
             overrideCam.nearClipPlane = componentInParent.nearClipPlane;
