@@ -2,8 +2,7 @@
 
 namespace WalkSimulator.Patches
 {
-
-    [HarmonyPatch(typeof(ControllerInputPoller), "Update")]
+    [HarmonyPatch(typeof(ControllerInputPoller), nameof(ControllerInputPoller.LateUpdate))]
     public class FingerPatch
     {
         public static bool forceLeftGrip;
@@ -22,42 +21,40 @@ namespace WalkSimulator.Patches
                 if (forceLeftGrip)
                 {
                     __instance.leftControllerGripFloat = 1f;
-                    __instance.leftGrab = true;
-                    __instance.leftGrabRelease = false;
+                    __instance.leftGrab                = true;
+                    __instance.leftGrabRelease         = false;
                 }
+
                 if (forceRightGrip)
                 {
                     __instance.rightControllerGripFloat = 1f;
-                    __instance.rightGrab = true;
-                    __instance.rightGrabRelease = false;
+                    __instance.rightGrab                = true;
+                    __instance.rightGrabRelease         = false;
                 }
+
                 if (forceLeftTrigger)
                 {
-                    __instance.leftControllerIndexFloat = 1f;
+                    __instance.leftControllerIndexFloat    = 1f;
                     __instance.leftControllerTriggerButton = true;
                 }
+
                 if (forceRightTrigger)
                 {
-                    __instance.rightControllerIndexFloat = 1f;
+                    __instance.rightControllerIndexFloat    = 1f;
                     __instance.rightControllerTriggerButton = true;
+                }
 
-                }
                 if (forceLeftPrimary)
-                {
                     __instance.leftControllerPrimaryButton = true;
-                }
+
                 if (forceRightPrimary)
-                {
                     __instance.rightControllerPrimaryButton = true;
-                }
+
                 if (forceLeftSecondary)
-                {
                     __instance.leftControllerSecondaryButton = true;
-                }
+
                 if (forceRightSecondary)
-                {
                     __instance.rightControllerSecondaryButton = true;
-                }
             }
         }
     }

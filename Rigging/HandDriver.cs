@@ -2,13 +2,10 @@
 using System.Collections;
 using GorillaLocomotion;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using WalkSimulator.Animators;
 using WalkSimulator.Patches;
 
 namespace WalkSimulator.Rigging
 {
-
     public class HandDriver : MonoBehaviour
     {
         public bool grip;
@@ -19,36 +16,30 @@ namespace WalkSimulator.Rigging
         public bool grounded;
         public bool hideControllerTransform = true;
 
-        public Vector3 targetPosition;
-        public Vector3 lookAt;
-        public Vector3 up;
-        public float followRate = 0.1f;
-        public Vector3 hit;
-        public Vector3 lastSnap;
-        public Vector3 normal;
-
-        private VRMap handMap;
-        private Vector3 defaultOffset;
-        private Transform head;
+        public  Vector3   targetPosition;
+        public  Vector3   lookAt;
+        public  Vector3   up;
+        public  float     followRate = 0.1f;
+        public  Vector3   hit;
+        public  Vector3   lastSnap;
+        public  Vector3   normal;
         private Transform body;
         private Transform controller;
+        private Vector3   defaultOffset;
+
+        private VRMap     handMap;
+        private Transform head;
 
         public Vector3 DefaultPosition => body.TransformPoint(defaultOffset);
 
-        public void Init(bool isLeft)
+        public void Reset()
         {
-            this.isLeft = isLeft;
-            defaultOffset = new Vector3(isLeft ? -0.25f : 0.25f, -0.45f, 0.2f);
-            handMap = isLeft ? GorillaTagger.Instance.offlineVRRig.leftHand : GorillaTagger.Instance.offlineVRRig.rightHand;
-            head = Rig.Instance.head;
-            body = Rig.Instance.body;
-            controller = isLeft ? GTPlayer.Instance.leftControllerTransform : GTPlayer.Instance.rightControllerTransform;
-
-            transform.position = DefaultPosition;
-            targetPosition = DefaultPosition;
-            lastSnap = DefaultPosition;
-            hit = DefaultPosition;
-            up = Vector3.up;
+            grip                    = trigger = primary = false;
+            targetPosition          = DefaultPosition;
+            lookAt                  = targetPosition + body.forward;
+            up                      = isLeft ? body.right : -body.right;
+            hideControllerTransform = true;
+            grounded                = false;
         }
 
         private void FixedUpdate()
@@ -57,33 +48,29 @@ namespace WalkSimulator.Rigging
             transform.LookAt(lookAt, up);
 
             if (hideControllerTransform)
-            {
                 controller.position = body.position;
-            }
             else
-            {
                 controller.position = transform.position;
-            }
 
             if (isLeft)
             {
-                FingerPatch.forceLeftGrip = grip;
-                FingerPatch.forceLeftPrimary = primary;
+                FingerPatch.forceLeftGrip      = grip;
+                FingerPatch.forceLeftPrimary   = primary;
                 FingerPatch.forceLeftSecondary = secondary;
-                FingerPatch.forceLeftTrigger = trigger;
+                FingerPatch.forceLeftTrigger   = trigger;
             }
             else
             {
-                FingerPatch.forceRightGrip = grip;
-                FingerPatch.forceRightPrimary = primary;
+                FingerPatch.forceRightGrip      = grip;
+                FingerPatch.forceRightPrimary   = primary;
                 FingerPatch.forceRightSecondary = secondary;
-                FingerPatch.forceRightTrigger = trigger;
+                FingerPatch.forceRightTrigger   = trigger;
             }
         }
 
         private void OnEnable()
         {
-            object[] obj = new object[2] { "  Current animator:", null };
+            object[] obj = new object[2] { "  Current animator:", null, };
             obj[1] = Rig.Instance.Animator != null ? Rig.Instance.Animator.name : null;
             Logging.Debug(obj);
             Logging.Debug("  body:", body == null);
@@ -92,7 +79,7 @@ namespace WalkSimulator.Rigging
             {
                 Logging.Debug("  Enabling HandDriver", name);
                 transform.position = DefaultPosition;
-                targetPosition = DefaultPosition;
+                targetPosition     = DefaultPosition;
 
                 try
                 {
@@ -105,23 +92,36 @@ namespace WalkSimulator.Rigging
             }
         }
 
+        public void Init(bool isLeft)
+        {
+            this.isLeft   = isLeft;
+            defaultOffset = new Vector3(isLeft ? -0.25f : 0.25f, -0.45f, 0.2f);
+            handMap = isLeft
+                              ? GorillaTagger.Instance.offlineVRRig.leftHand
+                              : GorillaTagger.Instance.offlineVRRig.rightHand;
+
+            head = Rig.Instance.head;
+            body = Rig.Instance.body;
+            controller =
+                    isLeft
+                            ? GTPlayer.Instance.LeftHand.controllerTransform
+                            : GTPlayer.Instance.RightHand.controllerTransform;
+
+            transform.position = DefaultPosition;
+            targetPosition     = DefaultPosition;
+            lastSnap           = DefaultPosition;
+            hit                = DefaultPosition;
+            up                 = Vector3.up;
+        }
+
         private IEnumerator Disable(Action<HandDriver> onDisable)
         {
             transform.position = DefaultPosition;
+
             yield return new WaitForSeconds(0.1f);
             handMap.overrideTarget = null;
-            enabled = false;
+            enabled                = false;
             onDisable?.Invoke(this);
-        }
-
-        public void Reset()
-        {
-            grip = trigger = primary = false;
-            targetPosition = DefaultPosition;
-            lookAt = targetPosition + body.forward;
-            up = isLeft ? body.right : -body.right;
-            hideControllerTransform = true;
-            grounded = false;
         }
     }
 }

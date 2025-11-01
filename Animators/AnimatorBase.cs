@@ -1,28 +1,27 @@
 ﻿using UnityEngine;
-using UnityEngine.Animations.Rigging;
 using WalkSimulator.Rigging;
 
 namespace WalkSimulator.Animators
 {
-    using VRRig = WalkSimulator.Rigging.Rig;
+    using VRRig = Rig;
 
     public abstract class AnimatorBase : MonoBehaviour
     {
-        protected Transform body;
-        protected Transform head;
-        protected Rigidbody rigidbody;
+        protected Transform  body;
+        protected Transform  head;
         protected HandDriver leftHand;
+        protected VRRig      rig;
         protected HandDriver rightHand;
-        protected VRRig rig;
+        protected Rigidbody  rigidbody;
 
         protected virtual void Start()
         {
             Logging.Debug("==START==");
-            rig = VRRig.Instance;
-            body = rig.body;
-            head = rig.head;
+            rig       = VRRig.Instance;
+            body      = rig.body;
+            head      = rig.head;
             rigidbody = rig.rigidbody;
-            leftHand = rig.leftHand;
+            leftHand  = rig.leftHand;
             rightHand = rig.rightHand;
         }
 
@@ -30,9 +29,9 @@ namespace WalkSimulator.Animators
 
         public virtual void Cleanup()
         {
-            enabled = false;
-            rig.active = false;
-            rig.useGravity = true;
+            enabled             = false;
+            rig.active          = false;
+            rig.useGravity      = true;
             rig.headDriver.turn = true;
             leftHand.Reset();
             rightHand.Reset();

@@ -1,42 +1,42 @@
-﻿using Unity.Cinemachine;
-using GorillaLocomotion;
+﻿using GorillaLocomotion;
+using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 
 namespace WalkSimulator.Rigging
 {
-
     public class HeadDriver : MonoBehaviour
     {
         public static HeadDriver Instance;
 
-        public Transform thirpyTarget;
-        public Transform head;
+        public Transform  thirpyTarget;
+        public Transform  head;
         public GameObject cameraObject;
         public GameObject cameraTransform;
 
-        private Vector3 offset = Vector3.zero;
-        private Camera overrideCam;
-
-        public bool turn = true;
+        public  bool turn = true;
         private bool _lockCursor;
+
+        private readonly Vector3 offset = Vector3.zero;
+        private          Camera  overrideCam;
 
         public bool LockCursor
         {
             get => _lockCursor;
+
             set
             {
                 _lockCursor = value;
                 if (_lockCursor)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
+                    Cursor.visible   = false;
                 }
                 else
                 {
                     Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
+                    Cursor.visible   = true;
                 }
             }
         }
@@ -48,29 +48,30 @@ namespace WalkSimulator.Rigging
         }
 
         private void Awake() => Instance = this;
+
         private void Start()
         {
-            Cinemachine3rdPersonFollow val = Object.FindObjectOfType<Cinemachine3rdPersonFollow>();
+            Cinemachine3rdPersonFollow val = FindObjectOfType<Cinemachine3rdPersonFollow>();
             thirpyTarget = val.VirtualCamera.Follow;
 
             Camera componentInParent = val.gameObject.GetComponentInParent<Camera>();
             cameraObject = new GameObject("WalkSim First Person Camera");
-            overrideCam = cameraObject.AddComponent<Camera>();
+            overrideCam  = cameraObject.AddComponent<Camera>();
             cameraObject.AddComponent<UniversalAdditionalCameraData>();
 
-            overrideCam.fieldOfView = 90f;
+            overrideCam.fieldOfView   = 90f;
             overrideCam.nearClipPlane = componentInParent.nearClipPlane;
-            overrideCam.farClipPlane = componentInParent.farClipPlane;
+            overrideCam.farClipPlane  = componentInParent.farClipPlane;
             overrideCam.targetDisplay = componentInParent.targetDisplay;
-            overrideCam.cullingMask = componentInParent.cullingMask;
-            overrideCam.depth = componentInParent.depth + 1f;
-            overrideCam.enabled = false;
+            overrideCam.cullingMask   = componentInParent.cullingMask;
+            overrideCam.depth         = componentInParent.depth + 1f;
+            overrideCam.enabled       = false;
         }
 
         private void LateUpdate()
         {
             cameraObject.transform.position = GTPlayer.Instance.headCollider.transform.TransformPoint(offset);
-            cameraObject.transform.forward = head.forward;
+            cameraObject.transform.forward  = head.forward;
 
             if (!turn) return;
 
@@ -83,20 +84,12 @@ namespace WalkSimulator.Rigging
             if (eulerAngles.x > 180f)
                 eulerAngles.x -= 360f;
 
-            eulerAngles.x = Mathf.Clamp(eulerAngles.x, -60f, 60f);
+            eulerAngles.x                                                  = Mathf.Clamp(eulerAngles.x, -60f, 60f);
             GorillaTagger.Instance.offlineVRRig.headConstraint.eulerAngles = eulerAngles;
 
-            thirpyTarget.localEulerAngles = new Vector3(eulerAngles.x, 0f, 0f);
+            thirpyTarget.localEulerAngles                             = new Vector3(eulerAngles.x, 0f, 0f);
             GTPlayer.Instance.headCollider.transform.localEulerAngles = new Vector3(eulerAngles.x, 0f, 0f);
         }
-
-        private void OverrideHeadMovement()
-        {
-            Logging.Debug("Overriding head movement");
-            head = GorillaTagger.Instance.offlineVRRig.head.rigTarget;
-        }
-
-        internal void ToggleCam() => overrideCam.enabled = !overrideCam.enabled;
 
         private void OnEnable()
         {
@@ -114,9 +107,17 @@ namespace WalkSimulator.Rigging
 
             if (head != null)
             {
-                LockCursor = false;
+                LockCursor                                         = false;
                 GorillaTagger.Instance.offlineVRRig.head.rigTarget = head;
             }
         }
+
+        private void OverrideHeadMovement()
+        {
+            Logging.Debug("Overriding head movement");
+            head = GorillaTagger.Instance.offlineVRRig.head.rigTarget;
+        }
+
+        internal void ToggleCam() => overrideCam.enabled = !overrideCam.enabled;
     }
 }

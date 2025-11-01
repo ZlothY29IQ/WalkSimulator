@@ -5,13 +5,9 @@ using UnityEngine;
 
 namespace WalkSimulator.Tools
 {
-
     public static class AssetUtils
     {
-        private static string FormatPath(string path)
-        {
-            return path.Replace("/", ".").Replace("\\", ".");
-        }
+        private static string FormatPath(string path) => path.Replace("/", ".").Replace("\\", ".");
 
         public static AssetBundle LoadAssetBundle(string path)
         {
@@ -20,20 +16,24 @@ namespace WalkSimulator.Tools
             if (stream == null)
             {
                 Debug.LogError($"Resource not found: {path}");
+
                 return null;
             }
+
             return AssetBundle.LoadFromStream(stream);
         }
 
         public static string[] GetResourceNames()
         {
-            var callingAssembly = Assembly.GetCallingAssembly();
-            string[] names = callingAssembly.GetManifestResourceNames();
+            Assembly callingAssembly = Assembly.GetCallingAssembly();
+            string[] names           = callingAssembly.GetManifestResourceNames();
             if (names == null || names.Length == 0)
             {
                 Debug.Log("No manifest resources found.");
+
                 return Array.Empty<string>();
             }
+
             return names;
         }
     }

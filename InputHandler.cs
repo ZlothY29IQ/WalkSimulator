@@ -1,22 +1,21 @@
-﻿using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.InputSystem;
-using UnityEngine.XR;
-#if STEAMVR
+﻿#if STEAMVR
 using Valve.VR;
 #endif
+using UnityEngine;
+using UnityEngine.InputSystem;
 using WalkSimulator.Animators;
 using WalkSimulator.Menus;
 using WalkSimulator.Rigging;
+using CommonUsages = UnityEngine.XR.CommonUsages;
+using InputDevice = UnityEngine.XR.InputDevice;
 
 namespace WalkSimulator
 {
     public class InputHandler : MonoBehaviour
     {
+        public static Vector3      inputDirection;
+        public static Vector3      inputDirectionNoY;
         public static InputHandler Instance { get; private set; }
-
-        public static Vector3 inputDirection;
-        public static Vector3 inputDirectionNoY;
 
         private bool Jump => Keyboard.current.spaceKey.wasPressedThisFrame;
 
@@ -33,17 +32,13 @@ namespace WalkSimulator
             GetInputDirection();
 
             if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
                 HeadDriver.Instance.LockCursor = !HeadDriver.Instance.LockCursor;
-            }
 
             if (Keyboard.current.cKey.wasPressedThisFrame)
-            {
                 HeadDriver.Instance.ToggleCam();
-            }
 
-            var radialMenu = Plugin.Instance.radialMenu;
-            bool tabPressed = Keyboard.current.tabKey.isPressed;
+            RadialMenu radialMenu = Plugin.Instance.radialMenu;
+            bool       tabPressed = Keyboard.current.tabKey.isPressed;
             radialMenu.enabled = tabPressed;
             radialMenu.gameObject.SetActive(tabPressed);
 
@@ -62,8 +57,8 @@ namespace WalkSimulator
         {
             if (Plugin.Instance.emoteAnimator is EmoteAnimator emoteAnimator)
             {
-                WalkSimulator.Rigging.Rig.Instance.Animator = emoteAnimator;
-                emoteAnimator.emote = emote;
+                Rig.Instance.Animator = emoteAnimator;
+                emoteAnimator.emote   = emote;
             }
         }
 
@@ -72,8 +67,9 @@ namespace WalkSimulator
             Vector3 keyboardDir = KeyboardInput();
             if (keyboardDir.magnitude > 0f)
             {
-                inputDirection = keyboardDir.normalized;
+                inputDirection    = keyboardDir.normalized;
                 inputDirectionNoY = new Vector3(keyboardDir.x, 0f, keyboardDir.z).normalized;
+
                 return;
             }
 
@@ -92,19 +88,19 @@ namespace WalkSimulator
             }
             else
             {
-                var leftDevice = ControllerInputPoller.instance.leftControllerDevice;
-                var rightDevice = ControllerInputPoller.instance.rightControllerDevice;
+                InputDevice leftDevice  = ControllerInputPoller.instance.leftControllerDevice;
+                InputDevice rightDevice = ControllerInputPoller.instance.rightControllerDevice;
 
-                leftDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftAxis);
-                rightDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 rightAxis);
+                leftDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 leftAxis);
+                rightDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 rightAxis);
 
                 x = leftAxis.x;
                 y = rightAxis.y;
                 z = leftAxis.y;
             }
 
-            var dir = new Vector3(x, y, z);
-            inputDirection = dir.normalized;
+            Vector3 dir = new Vector3(x, y, z);
+            inputDirection    = dir.normalized;
             inputDirectionNoY = new Vector3(x, 0f, z).normalized;
         }
 
@@ -117,7 +113,7 @@ namespace WalkSimulator
             if (Keyboard.current.sKey.isPressed) z -= 1f;
             if (Keyboard.current.wKey.isPressed) z += 1f;
 
-            if (Keyboard.current.ctrlKey.isPressed) y -= 1f;
+            if (Keyboard.current.ctrlKey.isPressed) y  -= 1f;
             if (Keyboard.current.spaceKey.isPressed) y += 1f;
 
             return new Vector3(x, y, z);
