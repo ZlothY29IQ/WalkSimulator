@@ -9,74 +9,74 @@ using WalkSimulator.Rigging;
 using CommonUsages = UnityEngine.XR.CommonUsages;
 using InputDevice = UnityEngine.XR.InputDevice;
 
-namespace WalkSimulator
+namespace WalkSimulator;
+
+public class InputHandler : MonoBehaviour
 {
-    public class InputHandler : MonoBehaviour
+    public static Vector3      inputDirection;
+    public static Vector3      inputDirectionNoY;
+    public static InputHandler Instance { get; private set; }
+
+    private bool Jump => Keyboard.current.spaceKey.wasPressedThisFrame;
+
+    private void Awake()
     {
-        public static Vector3      inputDirection;
-        public static Vector3      inputDirectionNoY;
-        public static InputHandler Instance { get; private set; }
+        Instance = this;
+    }
 
-        private bool Jump => Keyboard.current.spaceKey.wasPressedThisFrame;
+    private void Update()
+    {
+        if (!Plugin.Instance.Enabled || ComputerGUI.Instance.IsInUse)
+            return;
 
-        private void Awake()
+        GetInputDirection();
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            HeadDriver.Instance.LockCursor = !HeadDriver.Instance.LockCursor;
+
+        if (Keyboard.current.cKey.wasPressedThisFrame)
+            HeadDriver.Instance.ToggleCam();
+
+        RadialMenu radialMenu = Plugin.Instance.radialMenu;
+        bool       tabPressed = Keyboard.current.tabKey.isPressed;
+        radialMenu.enabled = tabPressed;
+        radialMenu.gameObject.SetActive(tabPressed);
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Wave);
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Point);
+        if (Keyboard.current.digit3Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.ThumbsUp);
+        if (Keyboard.current.digit4Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.ThumbsDown);
+        if (Keyboard.current.digit5Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Shrug);
+        if (Keyboard.current.digit6Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance);
+        if (Keyboard.current.digit7Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance2);
+        if (Keyboard.current.digit8Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Goofy);
+        if (Keyboard.current.digit9Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.UltraGoofy);
+    }
+
+    private void EnableEmote(EmoteAnimator.Emote emote)
+    {
+        if (Plugin.Instance.emoteAnimator is EmoteAnimator emoteAnimator)
         {
-            Instance = this;
+            Rig.Instance.Animator = emoteAnimator;
+            emoteAnimator.emote   = emote;
+        }
+    }
+
+    private void GetInputDirection()
+    {
+        Vector3 keyboardDir = KeyboardInput();
+        if (keyboardDir.magnitude > 0f)
+        {
+            inputDirection    = keyboardDir.normalized;
+            inputDirectionNoY = new Vector3(keyboardDir.x, 0f, keyboardDir.z).normalized;
+
+            return;
         }
 
-        private void Update()
+        float x = 0f, y = 0f, z = 0f;
+
+        if (Plugin.IsSteam)
         {
-            if (!Plugin.Instance.Enabled || ComputerGUI.Instance.IsInUse)
-                return;
-
-            GetInputDirection();
-
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
-                HeadDriver.Instance.LockCursor = !HeadDriver.Instance.LockCursor;
-
-            if (Keyboard.current.cKey.wasPressedThisFrame)
-                HeadDriver.Instance.ToggleCam();
-
-            RadialMenu radialMenu = Plugin.Instance.radialMenu;
-            bool       tabPressed = Keyboard.current.tabKey.isPressed;
-            radialMenu.enabled = tabPressed;
-            radialMenu.gameObject.SetActive(tabPressed);
-
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Wave);
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Point);
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.ThumbsUp);
-            if (Keyboard.current.digit4Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.ThumbsDown);
-            if (Keyboard.current.digit5Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Shrug);
-            if (Keyboard.current.digit6Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance);
-            if (Keyboard.current.digit7Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Dance2);
-            if (Keyboard.current.digit8Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.Goofy);
-            if (Keyboard.current.digit9Key.wasPressedThisFrame) EnableEmote(EmoteAnimator.Emote.UltraGoofy);
-        }
-
-        private void EnableEmote(EmoteAnimator.Emote emote)
-        {
-            if (Plugin.Instance.emoteAnimator is EmoteAnimator emoteAnimator)
-            {
-                Rig.Instance.Animator = emoteAnimator;
-                emoteAnimator.emote   = emote;
-            }
-        }
-
-        private void GetInputDirection()
-        {
-            Vector3 keyboardDir = KeyboardInput();
-            if (keyboardDir.magnitude > 0f)
-            {
-                inputDirection    = keyboardDir.normalized;
-                inputDirectionNoY = new Vector3(keyboardDir.x, 0f, keyboardDir.z).normalized;
-
-                return;
-            }
-
-            float x = 0f, y = 0f, z = 0f;
-
-            if (Plugin.IsSteam)
-            {
 #if STEAMVR
                 Vector2 leftAxis = SteamVR_Actions.gorillaTag_LeftJoystick2DAxis.axis;
                 Vector2 rightAxis = SteamVR_Actions.gorillaTag_RightJoystick2DAxis.axis;
@@ -85,38 +85,37 @@ namespace WalkSimulator
                 y = rightAxis.y;
                 z = leftAxis.y;
 #endif
-            }
-            else
-            {
-                InputDevice leftDevice  = ControllerInputPoller.instance.leftControllerDevice;
-                InputDevice rightDevice = ControllerInputPoller.instance.rightControllerDevice;
-
-                leftDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 leftAxis);
-                rightDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 rightAxis);
-
-                x = leftAxis.x;
-                y = rightAxis.y;
-                z = leftAxis.y;
-            }
-
-            Vector3 dir = new Vector3(x, y, z);
-            inputDirection    = dir.normalized;
-            inputDirectionNoY = new Vector3(x, 0f, z).normalized;
         }
-
-        private Vector3 KeyboardInput()
+        else
         {
-            float x = 0f, y = 0f, z = 0f;
+            InputDevice leftDevice  = ControllerInputPoller.instance.leftControllerDevice;
+            InputDevice rightDevice = ControllerInputPoller.instance.rightControllerDevice;
 
-            if (Keyboard.current.aKey.isPressed) x -= 1f;
-            if (Keyboard.current.dKey.isPressed) x += 1f;
-            if (Keyboard.current.sKey.isPressed) z -= 1f;
-            if (Keyboard.current.wKey.isPressed) z += 1f;
+            leftDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 leftAxis);
+            rightDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 rightAxis);
 
-            if (Keyboard.current.ctrlKey.isPressed) y  -= 1f;
-            if (Keyboard.current.spaceKey.isPressed) y += 1f;
-
-            return new Vector3(x, y, z);
+            x = leftAxis.x;
+            y = rightAxis.y;
+            z = leftAxis.y;
         }
+
+        Vector3 dir = new(x, y, z);
+        inputDirection    = dir.normalized;
+        inputDirectionNoY = new Vector3(x, 0f, z).normalized;
+    }
+
+    private Vector3 KeyboardInput()
+    {
+        float x = 0f, y = 0f, z = 0f;
+
+        if (Keyboard.current.aKey.isPressed) x -= 1f;
+        if (Keyboard.current.dKey.isPressed) x += 1f;
+        if (Keyboard.current.sKey.isPressed) z -= 1f;
+        if (Keyboard.current.wKey.isPressed) z += 1f;
+
+        if (Keyboard.current.ctrlKey.isPressed) y  -= 1f;
+        if (Keyboard.current.spaceKey.isPressed) y += 1f;
+
+        return new Vector3(x, y, z);
     }
 }

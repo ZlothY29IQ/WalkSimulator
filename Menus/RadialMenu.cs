@@ -5,92 +5,91 @@ using UnityEngine.UI;
 using WalkSimulator.Animators;
 using WalkSimulator.Rigging;
 
-namespace WalkSimulator.Menus
+namespace WalkSimulator.Menus;
+
+public class RadialMenu : MonoBehaviour
 {
-    public class RadialMenu : MonoBehaviour
+    private bool cursorWasLocked;
+
+    public List<Icon> icons;
+
+    private AnimatorBase selectedAnimator;
+    private bool         wasTurning;
+
+    private void Awake()
     {
-        private bool cursorWasLocked;
+        Image walkImage     = transform.Find("Icons/Walk").GetComponent<Image>();
+        Image poseImage     = transform.Find("Icons/Pose").GetComponent<Image>();
+        Image interactImage = transform.Find("Icons/Interact").GetComponent<Image>();
+        Image flyImage      = transform.Find("Icons/Fly").GetComponent<Image>();
 
-        public List<Icon> icons;
-
-        private AnimatorBase selectedAnimator;
-        private bool         wasTurning;
-
-        private void Awake()
+        icons = new List<Icon>
         {
-            Image walkImage     = transform.Find("Icons/Walk").GetComponent<Image>();
-            Image poseImage     = transform.Find("Icons/Pose").GetComponent<Image>();
-            Image interactImage = transform.Find("Icons/Interact").GetComponent<Image>();
-            Image flyImage      = transform.Find("Icons/Fly").GetComponent<Image>();
-
-            icons = new List<Icon>
-            {
-                    new Icon { image = walkImage, direction = Vector2.up, animator = Plugin.Instance.walkAnimator, },
-                    new Icon
-                    {
-                            image = interactImage, direction = Vector2.left, animator = Plugin.Instance.grabAnimator,
-                    },
-                    new Icon { image = poseImage, direction = Vector2.down, animator  = Plugin.Instance.handAnimator, },
-                    new Icon { image = flyImage, direction  = Vector2.right, animator = Plugin.Instance.flyAnimator, },
-            };
-        }
-
-        private void Update()
-        {
-            Vector2 mousePos     = Mouse.current.position.ReadValue();
-            Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-            Vector2 direction    = mousePos - screenCenter;
-
-            if (direction.magnitude < Screen.width / 20f)
-                return;
-
-            Icon  closestIcon = new Icon();
-            float minDistance = float.PositiveInfinity;
-            foreach (Icon icon in icons)
-            {
-                float distance = Vector2.Distance(direction.normalized, icon.direction);
-                if (distance < minDistance)
+                new() { image = walkImage, direction = Vector2.up, animator = Plugin.Instance.walkAnimator, },
+                new()
                 {
-                    closestIcon = icon;
-                    minDistance = distance;
-                }
-            }
+                        image = interactImage, direction = Vector2.left, animator = Plugin.Instance.grabAnimator,
+                },
+                new() { image = poseImage, direction = Vector2.down, animator  = Plugin.Instance.handAnimator, },
+                new() { image = flyImage, direction  = Vector2.right, animator = Plugin.Instance.flyAnimator, },
+        };
+    }
 
-            selectedAnimator = closestIcon.animator;
+    private void Update()
+    {
+        Vector2 mousePos     = Mouse.current.position.ReadValue();
+        Vector2 screenCenter = new(Screen.width / 2f, Screen.height / 2f);
+        Vector2 direction    = mousePos - screenCenter;
 
-            foreach (Icon icon in icons)
+        if (direction.magnitude < Screen.width / 20f)
+            return;
+
+        Icon  closestIcon = new();
+        float minDistance = float.PositiveInfinity;
+        foreach (Icon icon in icons)
+        {
+            float distance = Vector2.Distance(direction.normalized, icon.direction);
+            if (distance < minDistance)
             {
-                bool isSelected = icon.Equals(closestIcon);
-                icon.image.color                = isSelected ? Color.white : Color.gray;
-                icon.image.transform.localScale = Vector3.one * (isSelected ? 1.5f : 1f);
+                closestIcon = icon;
+                minDistance = distance;
             }
         }
 
-        private void OnEnable()
+        selectedAnimator = closestIcon.animator;
+
+        foreach (Icon icon in icons)
         {
-            cursorWasLocked                = HeadDriver.Instance.LockCursor;
-            wasTurning                     = HeadDriver.Instance.turn;
-            HeadDriver.Instance.LockCursor = false;
-            HeadDriver.Instance.turn       = false;
+            bool isSelected = icon.Equals(closestIcon);
+            icon.image.color                = isSelected ? Color.white : Color.gray;
+            icon.image.transform.localScale = Vector3.one * (isSelected ? 1.5f : 1f);
         }
+    }
 
-        private void OnDisable()
-        {
-            Logging.Debug("RadialMenu disabled");
+    private void OnEnable()
+    {
+        cursorWasLocked                = HeadDriver.Instance.LockCursor;
+        wasTurning                     = HeadDriver.Instance.turn;
+        HeadDriver.Instance.LockCursor = false;
+        HeadDriver.Instance.turn       = false;
+    }
 
-            HeadDriver.Instance.LockCursor = cursorWasLocked;
-            HeadDriver.Instance.turn       = wasTurning;
+    private void OnDisable()
+    {
+        Logging.Debug("RadialMenu disabled");
 
-            Rig.Instance.Animator = selectedAnimator;
+        HeadDriver.Instance.LockCursor = cursorWasLocked;
+        HeadDriver.Instance.turn       = wasTurning;
 
-            Logging.Debug("--Finished");
-        }
+        Rig.Instance.Animator = selectedAnimator;
 
-        public struct Icon
-        {
-            public Image        image;
-            public Vector2      direction;
-            public AnimatorBase animator;
-        }
+        Logging.Debug("--Finished");
+    }
+
+    public struct Icon
+    {
+        public Image        image;
+        public Vector2      direction;
+        public AnimatorBase animator;
     }
 }

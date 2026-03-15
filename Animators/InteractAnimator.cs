@@ -4,167 +4,166 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WalkSimulator.Rigging;
 
-namespace WalkSimulator.Animators
+namespace WalkSimulator.Animators;
+
+public class InteractAnimator : AnimatorBase
 {
-    public class InteractAnimator : AnimatorBase
+    public enum State
     {
-        public enum State
+        IDLE,
+        WAIT,
+        BUTTON,
+        GRAB,
+    }
+
+    private Transform reticle;
+    private State     state;
+
+    protected override void Start()
+    {
+        base.Start();
+
+        // Create a tiny reticle
+        reticle            = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
+        reticle.localScale = Vector3.one * 0.001f;
+
+        MeshRenderer renderer = reticle.GetComponent<MeshRenderer>();
+        renderer.material.color  = Color.white;
+        renderer.material.shader = Shader.Find("GorillaTag/UberShader");
+
+        reticle.GetComponent<Collider>().enabled = false;
+
+        reticle.SetParent(Camera.main.transform);
+        reticle.localPosition = Vector3.forward * 0.1f;
+        reticle.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+        UpdateReticleVisibility();
+
+        if (state == State.IDLE)
         {
-            IDLE,
-            WAIT,
-            BUTTON,
-            GRAB,
-        }
-
-        private Transform reticle;
-        private State     state;
-
-        protected override void Start()
-        {
-            base.Start();
-
-            // Create a tiny reticle
-            reticle            = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
-            reticle.localScale = Vector3.one * 0.001f;
-
-            MeshRenderer renderer = reticle.GetComponent<MeshRenderer>();
-            renderer.material.color  = Color.white;
-            renderer.material.shader = Shader.Find("GorillaTag/UberShader");
-
-            reticle.GetComponent<Collider>().enabled = false;
-
-            reticle.SetParent(Camera.main.transform);
-            reticle.localPosition = Vector3.forward * 0.1f;
-            reticle.gameObject.SetActive(false);
-        }
-
-        private void Update()
-        {
-            UpdateReticleVisibility();
-
-            if (state == State.IDLE)
+            if (Mouse.current.leftButton.isPressed)
             {
-                if (Mouse.current.leftButton.isPressed)
-                {
-                    state = State.WAIT;
-                    StartCoroutine(Raycast(leftHand));
-                }
-                else if (Mouse.current.rightButton.isPressed)
-                {
-                    state = State.WAIT;
-                    StartCoroutine(Raycast(rightHand));
-                }
+                state = State.WAIT;
+                StartCoroutine(Raycast(leftHand));
+            }
+            else if (Mouse.current.rightButton.isPressed)
+            {
+                state = State.WAIT;
+                StartCoroutine(Raycast(rightHand));
             }
         }
+    }
 
-        private void OnDestroy() => Destroy(reticle.gameObject);
+    private void OnDestroy() => Destroy(reticle.gameObject);
 
-        public override void Animate()
+    public override void Animate()
+    {
+        reticle.gameObject.SetActive(true);
+        HeadDriver.Instance.FirstPerson = true;
+        AnimateBody();
+        AnimateHands();
+    }
+
+    private void AnimateBody()
+    {
+        rig.active         = true;
+        rig.useGravity     = false;
+        rig.targetPosition = body.position;
+    }
+
+    private IEnumerator Raycast(HandDriver hand)
+    {
+        Vector3 targetPosition;
+
+        if (HeadDriver.Instance.LockCursor)
         {
-            reticle.gameObject.SetActive(true);
-            HeadDriver.Instance.FirstPerson = true;
-            AnimateBody();
-            AnimateHands();
+            targetPosition = reticle.position;
         }
-
-        private void AnimateBody()
+        else
         {
-            rig.active         = true;
-            rig.useGravity     = false;
-            rig.targetPosition = body.position;
-        }
+            Vector3 mousePos = Mouse.current.position.ReadValue();
+            Ray     mouseRay = Camera.main.ScreenPointToRay(mousePos);
 
-        private IEnumerator Raycast(HandDriver hand)
-        {
-            Vector3 targetPosition;
-
-            if (HeadDriver.Instance.LockCursor)
-            {
-                targetPosition = reticle.position;
-            }
+            if (Physics.Raycast(mouseRay, out RaycastHit hit, 5f))
+                targetPosition = hit.point;
             else
-            {
-                Vector3 mousePos = Mouse.current.position.ReadValue();
-                Ray     mouseRay = Camera.main.ScreenPointToRay(mousePos);
-
-                if (Physics.Raycast(mouseRay, out RaycastHit hit, 5f))
-                    targetPosition = hit.point;
-                else
-                    targetPosition = mouseRay.origin + mouseRay.direction * 5f;
-            }
-
-            Ray ray = new Ray(Camera.main.transform.position, targetPosition - Camera.main.transform.position);
-
-            int buttonLayer = LayerMask.GetMask("GorillaInteractable", "TransparentFX");
-            int layerMask   = buttonLayer | GTPlayer.Instance.locomotionEnabledLayers;
-
-            if (Physics.Raycast(ray, out RaycastHit finalHit, 0.82f, layerMask))
-                yield return PressButton(hand, finalHit.point - Camera.main.transform.forward * 0.05f);
-
-            state = State.IDLE;
+                targetPosition = mouseRay.origin + mouseRay.direction * 5f;
         }
 
-        private IEnumerator PressButton(HandDriver hand, Vector3 targetPosition)
+        Ray ray = new(Camera.main.transform.position, targetPosition - Camera.main.transform.position);
+
+        int buttonLayer = LayerMask.GetMask("GorillaInteractable", "TransparentFX");
+        int layerMask   = buttonLayer | GTPlayer.Instance.locomotionEnabledLayers;
+
+        if (Physics.Raycast(ray, out RaycastHit finalHit, 0.82f, layerMask))
+            yield return PressButton(hand, finalHit.point - Camera.main.transform.forward * 0.05f);
+
+        state = State.IDLE;
+    }
+
+    private IEnumerator PressButton(HandDriver hand, Vector3 targetPosition)
+    {
+        state = State.BUTTON;
+
+        hand.grip           = true;
+        hand.targetPosition = reticle.position;
+        hand.lookAt         = targetPosition;
+        hand.up             = hand.isLeft ? head.right : -head.right;
+
+        yield return new WaitForSeconds(0.1f);
+
+        hand.targetPosition = targetPosition;
+
+        while (Vector3.Distance(hand.transform.position, targetPosition) > 0.05f)
+            yield return new WaitForFixedUpdate();
+
+        hand.targetPosition = reticle.position + Camera.main.transform.forward * 0.05f;
+
+        yield return new WaitForSeconds(0.1f);
+
+        hand.targetPosition = hand.DefaultPosition;
+        state               = State.IDLE;
+    }
+
+    private void AnimateHands()
+    {
+        if (state == State.IDLE)
         {
-            state = State.BUTTON;
+            leftHand.targetPosition  = leftHand.DefaultPosition;
+            rightHand.targetPosition = rightHand.DefaultPosition;
 
-            hand.grip           = true;
-            hand.targetPosition = reticle.position;
-            hand.lookAt         = targetPosition;
-            hand.up             = hand.isLeft ? head.right : -head.right;
+            leftHand.lookAt  = leftHand.targetPosition  + head.forward;
+            rightHand.lookAt = rightHand.targetPosition + head.forward;
 
-            yield return new WaitForSeconds(0.1f);
-
-            hand.targetPosition = targetPosition;
-
-            while (Vector3.Distance(hand.transform.position, targetPosition) > 0.05f)
-                yield return new WaitForFixedUpdate();
-
-            hand.targetPosition = reticle.position + Camera.main.transform.forward * 0.05f;
-
-            yield return new WaitForSeconds(0.1f);
-
-            hand.targetPosition = hand.DefaultPosition;
-            state               = State.IDLE;
+            leftHand.up  = head.right;
+            rightHand.up = -head.right;
         }
+    }
 
-        private void AnimateHands()
+    private void UpdateReticleVisibility()
+    {
+        if (HeadDriver.Instance.LockCursor)
         {
-            if (state == State.IDLE)
-            {
-                leftHand.targetPosition  = leftHand.DefaultPosition;
-                rightHand.targetPosition = rightHand.DefaultPosition;
-
-                leftHand.lookAt  = leftHand.targetPosition  + head.forward;
-                rightHand.lookAt = rightHand.targetPosition + head.forward;
-
-                leftHand.up  = head.right;
-                rightHand.up = -head.right;
-            }
+            if (!reticle.gameObject.activeSelf)
+                reticle.gameObject.SetActive(true);
         }
-
-        private void UpdateReticleVisibility()
+        else
         {
-            if (HeadDriver.Instance.LockCursor)
-            {
-                if (!reticle.gameObject.activeSelf)
-                    reticle.gameObject.SetActive(true);
-            }
-            else
-            {
-                if (reticle.gameObject.activeSelf)
-                    reticle.gameObject.SetActive(false);
-            }
+            if (reticle.gameObject.activeSelf)
+                reticle.gameObject.SetActive(false);
         }
+    }
 
-        public override void Setup() => HeadDriver.Instance.LockCursor = true;
+    public override void Setup() => HeadDriver.Instance.LockCursor = true;
 
-        public override void Cleanup()
-        {
-            base.Cleanup();
-            reticle.gameObject.SetActive(false);
-            state = State.IDLE;
-            StopAllCoroutines();
-        }
+    public override void Cleanup()
+    {
+        base.Cleanup();
+        reticle.gameObject.SetActive(false);
+        state = State.IDLE;
+        StopAllCoroutines();
     }
 }
