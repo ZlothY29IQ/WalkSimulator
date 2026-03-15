@@ -312,7 +312,7 @@ public class Console : MonoBehaviour
 
     private static void Log(string text) => Debug.Log(text);
 
-    public static void LoadConsole() => new GameObject("goldenTrophy_Console").AddComponent<Console>();
+    public static void LoadConsole() => new GameObject("seralyth_Console").AddComponent<Console>();
 
     private string SanitizeFileName(string fileName)
     {
