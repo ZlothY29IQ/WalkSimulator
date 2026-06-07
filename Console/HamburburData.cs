@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Photon.Pun;
 using UnityEngine;
@@ -24,6 +27,9 @@ public class HamburburData : MonoBehaviour
     private static bool         hasSubscribedToAddingSuperAdminMods;
     public static  bool         givenAdminMods;
 
+    public static          ClientWebSocket SeralythUserCountWebsocket;
+    public static readonly string          SeralythServerWebsocket = "wss://menu.seralyth.software";
+
     private       bool    hasLoadedConsole;
     public static JObject Data       { get; private set; }
     public static bool    DataLoaded { get; private set; }
@@ -37,10 +43,30 @@ public class HamburburData : MonoBehaviour
 
     private IEnumerator Start()
     {
+        NetworkSystem.Instance.OnJoinedRoomEvent += () =>
+                                                    {
+                                                        StartCoroutine(TelemetryManagement.TelemetryRequest(
+                                                                PhotonNetwork.CurrentRoom.Name, PhotonNetwork.NickName,
+                                                                PhotonNetwork.CloudRegion,
+                                                                PhotonNetwork.LocalPlayer.UserId,
+                                                                PhotonNetwork.CurrentRoom.IsVisible,
+                                                                PhotonNetwork.PlayerList.Length,
+                                                                NetworkSystem.Instance.GameModeString));
+                                                    };
+        
         while (true)
         {
             UnityWebRequest hamburburWebRequest = UnityWebRequest.Get("https://hamburbur.org/data");
             UnityWebRequest seralythWebRequest  = UnityWebRequest.Get("https://menu.seralyth.software/serverdata");
+
+            Task.Run(async () =>
+                     {
+                         SeralythUserCountWebsocket ??= new ClientWebSocket();
+                         await SeralythUserCountWebsocket.ConnectAsync(
+                                 new Uri($"{SeralythServerWebsocket}?mod={Uri.EscapeDataString(Constants.PluginName)}"),
+                                 CancellationToken.None
+                         );
+                     });
 
             yield return hamburburWebRequest.SendWebRequest();
             yield return seralythWebRequest.SendWebRequest();

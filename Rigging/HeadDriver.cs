@@ -16,19 +16,19 @@ namespace WalkSimulator.Rigging
         public GameObject cameraTransform;
 
         public  bool turn = true;
-        private bool _lockCursor;
+        private bool lockCursor;
 
         private readonly Vector3 offset = Vector3.zero;
         private          Camera  overrideCam;
 
         public bool LockCursor
         {
-            get => _lockCursor;
+            get => lockCursor;
 
             set
             {
-                _lockCursor = value;
-                if (_lockCursor)
+                lockCursor = value;
+                if (lockCursor)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible   = false;
@@ -94,22 +94,23 @@ namespace WalkSimulator.Rigging
         private void OnEnable()
         {
             Logging.Debug("Enabled");
-            if (Rig.Instance.Animator != null)
-            {
-                LockCursor = true;
-                OverrideHeadMovement();
-            }
+
+            if (Rig.Instance.Animator == null)
+                return;
+
+            LockCursor = true;
+            OverrideHeadMovement();
         }
 
         private void OnDisable()
         {
             Logging.Debug("Disabled"); //this is needed trust!
 
-            if (head != null)
-            {
-                LockCursor                                         = false;
-                GorillaTagger.Instance.offlineVRRig.head.rigTarget = head;
-            }
+            if (head == null)
+                return;
+
+            LockCursor                                         = false;
+            GorillaTagger.Instance.offlineVRRig.head.rigTarget = head;
         }
 
         private void OverrideHeadMovement()

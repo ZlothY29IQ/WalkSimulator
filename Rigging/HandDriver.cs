@@ -47,10 +47,7 @@ namespace WalkSimulator.Rigging
             transform.position = Vector3.Lerp(transform.position, targetPosition, followRate);
             transform.LookAt(lookAt, up);
 
-            if (hideControllerTransform)
-                controller.position = body.position;
-            else
-                controller.position = transform.position;
+            controller.position = hideControllerTransform ? body.position : transform.position;
 
             if (isLeft)
             {
@@ -70,25 +67,25 @@ namespace WalkSimulator.Rigging
 
         private void OnEnable()
         {
-            object[] obj = new object[2] { "  Current animator:", null, };
+            object[] obj = ["  Current animator:", null,];
             obj[1] = Rig.Instance.Animator != null ? Rig.Instance.Animator.name : null;
             Logging.Debug(obj);
             Logging.Debug("  body:", body == null);
 
-            if (body != null && Rig.Instance.Animator != null)
-            {
-                Logging.Debug("  Enabling HandDriver", name);
-                transform.position = DefaultPosition;
-                targetPosition     = DefaultPosition;
+            if (body == null || Rig.Instance.Animator == null)
+                return;
 
-                try
-                {
-                    handMap.overrideTarget = transform;
-                }
-                catch (Exception e)
-                {
-                    Logging.Exception(e);
-                }
+            Logging.Debug("  Enabling HandDriver", name);
+            transform.position = DefaultPosition;
+            targetPosition     = DefaultPosition;
+
+            try
+            {
+                handMap.overrideTarget = transform;
+            }
+            catch (Exception e)
+            {
+                Logging.Exception(e);
             }
         }
 

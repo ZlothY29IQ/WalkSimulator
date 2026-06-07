@@ -44,7 +44,7 @@ public class Plugin : BaseUnityPlugin
     {
         get => _enabled;
 
-        protected set
+        private set
         {
             _enabled = value;
 

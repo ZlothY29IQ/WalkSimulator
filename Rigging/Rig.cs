@@ -24,8 +24,6 @@ public class Rig : MonoBehaviour
     private readonly float   raycastRadius = 0.3f;
     private readonly float   speed         = 4f;
 
-    private AnimatorBase _animator;
-
     private float scale = 1f;
 
     public static Rig     Instance               { get; private set; }
@@ -33,24 +31,24 @@ public class Rig : MonoBehaviour
 
     public AnimatorBase Animator
     {
-        get => _animator;
+        get;
 
         set
         {
-            if (_animator != null && value != _animator)
-                _animator.Cleanup();
+            if (field != null && value != field)
+                field.Cleanup();
 
-            _animator = value;
+            field = value;
 
-            if (_animator != null)
+            if (field != null)
             {
-                _animator.enabled = true;
-                _animator.Setup();
+                field.enabled = true;
+                field.Setup();
             }
 
-            leftHand.enabled   = _animator != null;
-            rightHand.enabled  = _animator != null;
-            headDriver.enabled = _animator != null;
+            leftHand.enabled   = field != null;
+            rightHand.enabled  = field != null;
+            headDriver.enabled = field != null;
         }
     }
 
@@ -90,7 +88,7 @@ public class Rig : MonoBehaviour
     {
         if (!active) return;
 
-        rigidbody.velocity = Vector3.Lerp(rigidbody.velocity, (targetPosition - body.position) * speed, 1f);
+        rigidbody.linearVelocity = Vector3.Lerp(rigidbody.linearVelocity, (targetPosition - body.position) * speed, 1f);
 
         if (!useGravity)
             rigidbody.AddForce(-Physics.gravity * rigidbody.mass * scale);

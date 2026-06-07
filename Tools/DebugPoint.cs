@@ -30,17 +30,16 @@ public class DebugPoint : MonoBehaviour
 
     public static Transform Get(string name, Vector3 position, Color color = default, float size = 0.1f)
     {
-        if (points.ContainsKey(name))
-        {
-            DebugPoint dp = points[name];
-            dp.color              = color;
-            dp.transform.position = position;
-            dp.size               = size;
+        if (!points.ContainsKey(name))
+            return Create(name, position, color, size);
 
-            return dp.transform;
-        }
+        DebugPoint dp = points[name];
+        dp.color              = color;
+        dp.transform.position = position;
+        dp.size               = size;
 
-        return Create(name, position, color, size);
+        return dp.transform;
+
     }
 
     private static Transform Create(string name, Vector3 position, Color color, float size)

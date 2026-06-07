@@ -23,16 +23,19 @@ public class RadialMenu : MonoBehaviour
         Image interactImage = transform.Find("Icons/Interact").GetComponent<Image>();
         Image flyImage      = transform.Find("Icons/Fly").GetComponent<Image>();
 
-        icons = new List<Icon>
-        {
-                new() { image = walkImage, direction = Vector2.up, animator = Plugin.Instance.walkAnimator, },
-                new()
+        icons =
+        [
+                new Icon { image = walkImage, direction = Vector2.up, animator = Plugin.Instance.walkAnimator, },
+                new Icon
                 {
-                        image = interactImage, direction = Vector2.left, animator = Plugin.Instance.grabAnimator,
+                        image    = interactImage, direction = Vector2.left,
+                        animator = Plugin.Instance.grabAnimator,
                 },
-                new() { image = poseImage, direction = Vector2.down, animator  = Plugin.Instance.handAnimator, },
-                new() { image = flyImage, direction  = Vector2.right, animator = Plugin.Instance.flyAnimator, },
-        };
+
+                new Icon { image = poseImage, direction = Vector2.down, animator  = Plugin.Instance.handAnimator, },
+                new Icon { image = flyImage, direction  = Vector2.right, animator = Plugin.Instance.flyAnimator, },
+
+        ];
     }
 
     private void Update()
@@ -49,11 +52,12 @@ public class RadialMenu : MonoBehaviour
         foreach (Icon icon in icons)
         {
             float distance = Vector2.Distance(direction.normalized, icon.direction);
-            if (distance < minDistance)
-            {
-                closestIcon = icon;
-                minDistance = distance;
-            }
+
+            if (!(distance < minDistance))
+                continue;
+
+            closestIcon = icon;
+            minDistance = distance;
         }
 
         selectedAnimator = closestIcon.animator;
@@ -86,7 +90,7 @@ public class RadialMenu : MonoBehaviour
         Logging.Debug("--Finished");
     }
 
-    public struct Icon
+    public record struct Icon
     {
         public Image        image;
         public Vector2      direction;

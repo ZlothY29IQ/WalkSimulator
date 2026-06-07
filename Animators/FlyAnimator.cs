@@ -36,7 +36,7 @@ namespace WalkSimulator.Animators
 
         private void OnGUI()
         {
-            if (ComputerGUI.Instance.inRange)
+            if (ComputerGUI.Instance.InRange)
                 guiHeight = 60f;
             else
                 guiHeight = 20f;

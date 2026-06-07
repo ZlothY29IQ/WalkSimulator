@@ -7,6 +7,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using WalkSimulator.Animators;
 using WalkSimulator.Rigging;
@@ -16,8 +17,8 @@ namespace WalkSimulator.Menus;
 
 public class ComputerGUI : MonoBehaviour
 {
-    public static ComputerGUI Instance;
-    public        bool        inRange;
+    public static                            ComputerGUI Instance;
+    public bool        InRange;
 
     private readonly Dictionary<KeyControl, GorillaKeyboardBindings> buttonMapping = new();
 
@@ -67,7 +68,7 @@ public class ComputerGUI : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame && inRange && !overrideCam.enabled)
+        if (Keyboard.current.eKey.wasPressedThisFrame && InRange && !overrideCam.enabled)
         {
             overrideCam.enabled   = true;
             cachedAnimator        = Rig.Instance.Animator;
@@ -110,12 +111,12 @@ public class ComputerGUI : MonoBehaviour
     private void FixedUpdate()
     {
         if (Time.frameCount % 60 == 0)
-            inRange = IsInRange();
+            InRange = IsInRange();
 
-        if (!inRange && Time.frameCount % 600 == 0)
+        if (!InRange && Time.frameCount % 600 == 0)
             terminals = FindObjectsOfType<GorillaComputerTerminal>();
 
-        if (inRange)
+        if (InRange)
         {
             GorillaComputerTerminal terminal = currentTerminal.GetComponent<GorillaComputerTerminal>();
             Transform screenTransform = terminal == null
@@ -134,7 +135,7 @@ public class ComputerGUI : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!inRange) return;
+        if (!InRange) return;
 
         string message = overrideCam.enabled ? "Press [Escape] to exit" : "Press [E] to use computer";
         GUI.Label(
